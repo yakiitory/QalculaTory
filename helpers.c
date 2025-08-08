@@ -115,3 +115,21 @@ bool isOperator(char c)
 }
 
 // TODO: Func to convert infix to postfix
+bool toPostfix(const char *postfix, double *result)
+{
+    // TODO: Implement postfix evaluation here
+    // - Use stack for operands
+    // - Push numbers onto stack
+    // - Pop operands when operator is found, apply, push result back
+    // - Handle division by zero
+    // Return false if invalid
+
+    NumStack* stack = createNumStack();
+    if (!stack)
+    {
+        fprintf(stderr, "Failed to create stack!\n");
+        exit(1);
+    }
+
+    return false; // placeholder
+}
