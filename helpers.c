@@ -109,5 +109,9 @@ bool isLeftAssociative(char op)
     return op != '^';
 }
 // TODO: Helper func if char is an operator
+bool isOperator(char c)
+{
+    return c == '+' || '-' || '*' || '/' || "^";
+}
 
 // TODO: Func to convert infix to postfix
