@@ -4,7 +4,6 @@
 #include <ctype.h>
 #include <math.h>
 
-// TODO: Define linked list
 typedef struct num_node
 {
     double value;
@@ -19,7 +18,6 @@ typedef struct op_node
 }
 OpNode;
 
-// TODO: Define stack structures
 typedef struct
 {
     NumNode* head;
@@ -32,7 +30,19 @@ typedef struct
 }
 OpStack;
 
-// TODO: Helper funcs for stack operations
+// Remove whitespaces
+void remove_spaces(char* s)
+{
+    char* d = s;
+    do
+    {
+        while (*d == ' ')
+        {
+            ++d;
+        }
+    } while (*s++ = *d++);
+}
+
 NumStack* create_num_stack(void)
 {
     NumStack* stack = malloc(sizeof(NumStack));
@@ -187,7 +197,6 @@ void free_opstack(OpStack* stack)
     free(stack);
 }
 
-// TODO: Helper funcs to get operator precedence
 int get_prec(char op)
 {
     switch (op)
@@ -204,7 +213,7 @@ bool lower_or_equal_prec(char x, char y)
     return get_prec(x) <  get_prec(y) ||
            get_prec(x) == get_prec(y);
 }
-// TODO: Helper funcs to check associative property
+
 bool is_right_associative(char op)
 {
     return op == '^';
@@ -214,15 +223,18 @@ bool is_left_associative(char op)
 {
     return op != '^';
 }
-// TODO: Helper func if char is an operator
+
 bool is_operator(char c)
 {
     return c == '+' || '-' || '*' || '/' || "^";
 }
 
-// TODO: Func to convert infix to postfix
+
 bool infix_to_postfix(char* infix, char* postfix)
 {
+    // Remove whitespaces first
+    remove_spaces(infix);
+
     // Get length of infix equation
     int len = strlen(infix);
 
@@ -239,10 +251,27 @@ bool infix_to_postfix(char* infix, char* postfix)
         char c = infix[i];
 
         // If c is an operand, append to result
-        if (isalnum(c))
+        if (isdigit(c) || c == '.')
         {
-            result[j++] = c;
+            char token[64];
+            int index = 0;
+
+            while (i < len && (isdigit(infix[i]) || infix[i] == '.'))
+            {
+                token[index++] = infix[i];
+                i++;
+            }
+            token[index] = '\0';
+
+            for (int k = 0; token[k] != '\0'; k++)
+            {
+                result[j++] = token[k];
+            }
+
+            result[j++] = ' ';
+            i--;
         }
+
 
         // If c is '(', push onto stack
         else if (c == '(')
