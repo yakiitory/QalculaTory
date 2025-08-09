@@ -1,8 +1,6 @@
 #include "helpers.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
-#include <string.h>
 #include <ctype.h>
 #include <math.h>
 
@@ -49,9 +47,9 @@ NumStack* create_num_stack(void)
 
 
 // Returns true if passed head from top of stack is null
-bool is_numstack_empty(NumNode* head)
+bool is_numstack_empty(NumStack* stack)
 {
-    return head == NULL;
+    return stack->head = NULL;
 }
 
 // Inserts on top of stack
@@ -73,7 +71,7 @@ void push_num(NumStack* stack, double value)
 // Retrieves on top of stack
 double pop_num(NumStack* stack)
 {
-    if (is_numstack_empty(stack->head))
+    if (is_numstack_empty(stack))
     {
         fprintf(stderr, "Stack is empty!\n");
         exit(1);
@@ -144,11 +142,11 @@ void push_op(OpStack* stack, char op)
     OpNode* op_node = malloc(sizeof(OpNode));
     if (!op_node)
     {
-        fprint(stderr,"Failed to allocate memory");
+        fprintf(stderr,"Failed to allocate memory");
         exit(1);
     }
 
-    op_node->value = value;
+    op_node->op = op;
     op_node->next = stack->head;
     stack->head = op_node;
 }
@@ -174,23 +172,19 @@ char peek_op(OpStack* stack)
         fprintf(stderr, "Stack is empty!\n");
         exit(1);
     }
-    OpNode* temp = stack->head;
-    char op = temp->op;
-    free(temp);
-    return op;
+    return stack->head->op;
 }
 
 void free_opstack(OpStack* stack)
 {
-    OpNode* temp_node;
-    OpNode* current_node = stack->head;
-    while (current_node != NULL)
+    OpNode* current = stack->head;
+    while (current)
     {
-        temp_node = current_node;
-        current_node = current_node->next;
-        free(temp_node);
+        OpNode* temp = current;
+        current = current->next;
+        free(temp);
     }
-    stack->head = NULL;
+    free(stack);
 }
 
 // TODO: Helper funcs to get operator precedence
@@ -207,8 +201,8 @@ int get_prec(char op)
 
 bool lower_or_equal_prec(char x, char y)
 {
-    return get_prec(a) <  get_prec(b) ||
-           get_prec(a) == get_prec(b);
+    return get_prec(x) <  get_prec(y) ||
+           get_prec(x) == get_prec(y);
 }
 // TODO: Helper funcs to check associative property
 bool is_right_associative(char op)
@@ -270,26 +264,26 @@ bool infix_to_postfix(char* infix, char* postfix)
         // If c is an operator
         else if (is_operator(c))
         {
-            while (!is_opstack_empty(stack) && lower_or_equal_prec(c, peek_op(stack))
+            while (!is_opstack_empty(stack) && lower_or_equal_prec(c, peek_op(stack)))
             {
-                push_op(stack, c);
+                result[j++] = pop_op(stack);
             }
-        }
-
-        // Pop all remaining in the stack
-        while (!is_opstack_empty)
-        {
-            result[j++] = pop_op(stack);
+            push_op(stack, c);
         }
     }
-    postfix = &result;
+
+    // Pop all remaining in the stack
+    while (!is_opstack_empty(stack))
+    {
+        result[j++] = pop_op(stack);
+    }
+
+    result[j] = '\0';
+    strcpy(postfix, result);
+
     free_opstack(stack);
 
-    if (postfix != NULL)
-    {
-        return true;
-    }
-    return false;
+    return true;
 }
 
 bool evalPostfix(char* postfix, double* result)

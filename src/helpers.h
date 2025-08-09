@@ -1,7 +1,7 @@
-#ifndef HELPERS_H
 #define HELPERS_H
 
 #include <stdbool.h>
+#include <string.h>
 
 // Maximum length for expressions
 #define MAX_LEN 256
