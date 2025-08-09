@@ -24,7 +24,7 @@ int main(void)
 
     printf("Postfix: %s\n", postfix);
 
-    if (!evaluate_postfix(postfix, &result))
+    if (!eval_postfix(postfix, &result))
     {
         printf("Error: Failed to evaluate expression.\n");
         return 1;

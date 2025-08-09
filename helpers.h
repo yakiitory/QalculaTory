@@ -8,7 +8,7 @@
 
 //  Converts an infix expression to postfix
 // returns true if successful, false if invalid
-bool toPostfix(const char *infix, char *postfix);
+bool infix_to_postfix(char* infix, char* postfix);
 
 // Evaluates a postfix expression
-bool evalPostfix(const char *postfix, double *result);
+bool eval_postfix(char* postfix, double* result);

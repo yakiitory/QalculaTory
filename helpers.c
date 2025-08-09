@@ -6,16 +6,37 @@
 #include <ctype.h>
 #include <math.h>
 
-// TODO: Define stack structure
+// TODO: Define linked list
+typedef struct num_node
+{
+    double value;
+    struct num_node* next;
+}
+NumNode;
+
+typedef struct op_node
+{
+    char op;
+    struct op_node* next;
+}
+OpNode;
+
+// TODO: Define stack structures
 typedef struct
 {
-    double items[MAX_LEN];
-    int top;
+    NumNode* head;
 }
 NumStack;
 
+typedef struct
+{
+    OpNode* head;
+}
+OpStack;
+
+
 // TODO: Helper funcs for stack operations
-NumStack* createNumStack(void)
+NumStack* create_num_stack(void)
 {
     NumStack* stack = malloc(sizeof(NumStack));
     if (!stack)
@@ -23,99 +44,212 @@ NumStack* createNumStack(void)
         fprintf(stderr, "Failed to allocate memory\n");
         exit(1);
     }
-    stack->top = -1;
+    stack->head = NULL;
     return stack;
 }
 
-// Returns true if stack is full
-bool isFull(NumStack* stack)
-{
-    // Returns true if the value of top inside stack is equal to the value of MAX_LEN - 1
-    return stack->top == (MAX_LEN - 1);
-}
 
-// Returns true if stack is empty
-bool isEmpty(NumStack* stack)
+// Returns true if passed head from top of stack is null
+bool is_numstack_empty(NumNode* head)
 {
-    // Empty value of a top in stack is always -1
-    return stack->top == -1;
+    return head == NULL;
 }
 
 // Inserts on top of stack
-void pushNum(NumStack* stack, double value)
+void push_num(NumStack* stack, double value)
 {
-    if (isFull(stack))
+    NumNode* new_node = malloc(sizeof(NumNode));
+    if (!new_node)
     {
-        fprintf(stderr, "Stack Overflow!\n");
+        fprintf(stderr, "Not enough memory to create node");
         exit(1);
     }
+
     // Inserts 'value' in the item field of the stack at the top index
-    stack->items[++stack->top] = value;
+    new_node->value = value;
+    new_node->next = stack->head;
+    stack->head = new_node->next;
 }
 
 // Retrieves on top of stack
-double popNum(NumStack* stack)
+double pop_num(NumStack* stack)
 {
-    if (isEmpty(stack))
+    if (is_numstack_empty(stack->head))
     {
         fprintf(stderr, "Stack is empty!\n");
         exit(1);
     }
-    // Takes the top value of the stack
-    return stack->items[stack->top--];
+    // Create temporary node, store top node
+    NumNode* temp = stack->head;
+
+    // Store current value at top node
+    double value = temp->value;
+
+    // Move current top node to the next node underneath, stored by temp node
+    stack->head = temp->next;
+
+    // Free temp node
+    free(temp);
+
+    // Return value
+    return value;
 }
 
 // Only peeks at whatever value on top of stack
-double peekNum(NumStack* stack)
+double peek_num(NumStack* stack)
 {
-    if (isEmpty(stack))
+    if (is_numstack_empty(stack))
     {
         fprintf(stderr, "Stack is empty!\n");
         exit(1);
     }
-    // Only peek at value
-    return stack->items[stack->top];
+    NumNode* temp = stack->head;
+    double value = temp->value;
+    free(temp);
+    return value;
 }
 
 // Free stack loaded onto memory
-void freeStack(NumStack* stack)
+void free_numstack(NumStack* stack)
 {
-    if (stack)
+    NumNode* temp_node;
+    NumNode* current_node = stack->head;
+    while (current_node != NULL)
     {
-        free(stack);
+        temp_node = current_node;
+        current_node = current_node->next;
+        free(temp_node);
     }
+    stack->head = NULL;
+}
+
+OpStack* create_op_stack(void)
+{
+    OpStack* stack = malloc(sizeof(OpStack));
+    if (!stack)
+    {
+        fprintf(stderr, "Failed to allocate memory!\n");
+        exit(1);
+    }
+    stack->head = NULL;
+    return stack;
+}
+
+bool is_opstack_empty(OpStack* stack)
+{
+    return stack->head == NULL;
+}
+
+void push_op(OpStack* stack, char op)
+{
+    OpNode* op_node = malloc(sizeof(OpNode));
+    if (!op_node)
+    {
+        fprint(stderr,"Failed to allocate memory");
+        exit(1);
+    }
+
+    op_node->value = value;
+    op_node->next = stack->head;
+    stack->head = op_node;
+}
+
+char pop_op(OpStack* stack)
+{
+    if (is_opstack_empty(stack))
+    {
+        fprintf(stderr, "Stack is empty!\n");
+        exit(1);
+    }
+    OpNode* temp = stack->head;
+    char op = temp->op;
+    stack->head = temp->next;
+    free(temp);
+    return op;
+}
+
+char peek(OpStack* stack)
+{
+    if (is_opstack_empty(stack))
+    {
+        fprintf(stderr, "Stack is empty!\n");
+        exit(1);
+    }
+    OpNode* temp = stack->head;
+    char op = temp->op;
+    free(temp);
+    return op;
+}
+
+void free_opstack(OpStack* stack)
+{
+    OpNode* temp_node;
+    OpNode* current_node = stack->head;
+    while (current_node != NULL)
+    {
+        temp_node = current_node;
+        current_node = current_node->next;
+        free(temp_node);
+    }
+    stack->head = NULL;
 }
 
 // TODO: Helper funcs to get operator precedence
-int getPrecendence(char op)
+int get_precedence(char op)
 {
     switch (op)
     {
         case '+': case '-': return 1;
         case '*': case '/': return 2;
         case '^': return 3;
-        default: return 0;
+        default: return -1;
     }
 }
 
 // TODO: Helper funcs to check associative property
-bool isRightAssociative(char op)
+bool is_right_associative(char op)
 {
     return op == '^';
 }
 
-bool isLeftAssociative(char op)
+bool is_left_associative(char op)
 {
     return op != '^';
 }
 // TODO: Helper func if char is an operator
-bool isOperator(char c)
+bool is_operator(char c)
 {
     return c == '+' || '-' || '*' || '/' || "^";
 }
 
 // TODO: Func to convert infix to postfix
-bool toPostfix(const char *postfix, double *result)
+bool infix_to_postfix(char* infix, char* postfix)
+{
+    // TODO: Implement the Shunting Yard Algorithm here
+    // - Tokenize input (numbers, operators, parentheses)
+    // - Use stack for operators
+    // - Output numbers immediately to postfix
+    // - Respect precedence & associativity
+    // - Handle unary minus
+    // Return false if invalid
+
+    // Get length of infix equation
+    int len = strlen(infix);
+
+    // Create OpStack for holding operators
+    OpStack* opStack = create_op_stack();
+
+    // Iterate over each
+    for (int i = 0; i < len; i++)
+    {
+        
+    }
+
+
+    return false; // placeholder
+}
+
+bool evalPostfix(char* postfix, double* result)
 {
     // TODO: Implement postfix evaluation here
     // - Use stack for operands
@@ -123,13 +257,5 @@ bool toPostfix(const char *postfix, double *result)
     // - Pop operands when operator is found, apply, push result back
     // - Handle division by zero
     // Return false if invalid
-
-    NumStack* stack = createNumStack();
-    if (!stack)
-    {
-        fprintf(stderr, "Failed to create stack!\n");
-        exit(1);
-    }
-
     return false; // placeholder
 }
