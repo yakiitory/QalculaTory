@@ -34,7 +34,6 @@ typedef struct
 }
 OpStack;
 
-
 // TODO: Helper funcs for stack operations
 NumStack* create_num_stack(void)
 {
@@ -168,7 +167,7 @@ char pop_op(OpStack* stack)
     return op;
 }
 
-char peek(OpStack* stack)
+char peek_op(OpStack* stack)
 {
     if (is_opstack_empty(stack))
     {
@@ -195,7 +194,7 @@ void free_opstack(OpStack* stack)
 }
 
 // TODO: Helper funcs to get operator precedence
-int get_precedence(char op)
+int get_prec(char op)
 {
     switch (op)
     {
@@ -206,6 +205,11 @@ int get_precedence(char op)
     }
 }
 
+bool lower_or_equal_prec(char x, char y)
+{
+    return get_prec(a) <  get_prec(b) ||
+           get_prec(a) == get_prec(b);
+}
 // TODO: Helper funcs to check associative property
 bool is_right_associative(char op)
 {
@@ -225,28 +229,67 @@ bool is_operator(char c)
 // TODO: Func to convert infix to postfix
 bool infix_to_postfix(char* infix, char* postfix)
 {
-    // TODO: Implement the Shunting Yard Algorithm here
-    // - Tokenize input (numbers, operators, parentheses)
-    // - Use stack for operators
-    // - Output numbers immediately to postfix
-    // - Respect precedence & associativity
-    // - Handle unary minus
-    // Return false if invalid
-
     // Get length of infix equation
     int len = strlen(infix);
 
+    // Create resultant string and counter
+    char result[len + 1];
+    int j = 0;
+
     // Create OpStack for holding operators
-    OpStack* opStack = create_op_stack();
+    OpStack* stack = create_op_stack();
 
     // Iterate over each
     for (int i = 0; i < len; i++)
     {
-        
+        char c = infix[i];
+
+        // If c is an operand, append to result
+        if (isalnum(c))
+        {
+            result[j++] = c;
+        }
+
+        // If c is '(', push onto stack
+        else if (c == '(')
+        {
+            push_op(stack, c);
+        }
+
+        // If c is ')',
+        else if (c == ')')
+        {
+            // pop and add to string from the stack until opening parenthesis is found
+            while (!is_opstack_empty(stack) && peek_op(stack) != '(')
+            {
+                result[j++] = pop_op(stack);
+            }
+            (void) pop_op(stack);
+        }
+
+        // If c is an operator
+        else if (is_operator(c))
+        {
+            while (!is_opstack_empty(stack) && lower_or_equal_prec(c, peek_op(stack))
+            {
+                push_op(stack, c);
+            }
+        }
+
+        // Pop all remaining in the stack
+        while (!is_opstack_empty)
+        {
+            result[j++] = pop_op(stack);
+        }
     }
+    postfix = &result;
+    free_opstack(stack);
 
-
-    return false; // placeholder
+    if (postfix != NULL)
+    {
+        return true;
+    }
+    return false;
 }
 
 bool evalPostfix(char* postfix, double* result)

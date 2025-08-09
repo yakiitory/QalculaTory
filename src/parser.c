@@ -23,13 +23,5 @@ int main(void)
     }
 
     printf("Postfix: %s\n", postfix);
-
-    if (!eval_postfix(postfix, &result))
-    {
-        printf("Error: Failed to evaluate expression.\n");
-        return 1;
-    }
-
-    printf("Result: %.6f\n", result);
     return 0;
 }
