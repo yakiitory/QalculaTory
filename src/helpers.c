@@ -59,7 +59,7 @@ NumStack* create_num_stack(void)
 // Returns true if passed head from top of stack is null
 bool is_numstack_empty(NumStack* stack)
 {
-    return stack->head = NULL;
+    return stack->head == NULL;
 }
 
 // Inserts on top of stack
@@ -75,7 +75,7 @@ void push_num(NumStack* stack, double value)
     // Inserts 'value' in the item field of the stack at the top index
     new_node->value = value;
     new_node->next = stack->head;
-    stack->head = new_node->next;
+    stack->head = new_node;
 }
 
 // Retrieves on top of stack
@@ -119,15 +119,14 @@ double peek_num(NumStack* stack)
 // Free stack loaded onto memory
 void free_numstack(NumStack* stack)
 {
-    NumNode* temp_node;
-    NumNode* current_node = stack->head;
-    while (current_node != NULL)
+    NumNode* current = stack->head;
+    while (current)
     {
-        temp_node = current_node;
-        current_node = current_node->next;
-        free(temp_node);
+        NumNode* temp = current;
+        current = current->next;
+        free(temp);
     }
-    stack->head = NULL;
+    free(stack);
 }
 
 OpStack* create_op_stack(void)
@@ -226,9 +225,21 @@ bool is_left_associative(char op)
 
 bool is_operator(char c)
 {
-    return c == '+' || '-' || '*' || '/' || "^";
+    switch (c)
+    {
+        case '+': case '-': case '*': case '/': case '^': return true;
+        default: return false;
+    }
 }
 
+double eval_expr(double x, double y, char op)
+{
+    if (op == '+') { return y + x; }
+    else if (op == '-') { return y - x; }
+    else if (op == '*') { return y * x; }
+    else if (op == '/') { return y / x; }
+    else if (op == '^') { return pow(y,x); }
+}
 
 bool infix_to_postfix(char* infix, char* postfix)
 {
@@ -239,11 +250,21 @@ bool infix_to_postfix(char* infix, char* postfix)
     int len = strlen(infix);
 
     // Create resultant string and counter
-    char result[len + 1];
+    char* result = malloc(len * 3);
+    if (!result)
+    {
+        fprintf(stderr, "Failed to allocate memory for [result]\n");
+        exit(1);
+    }
     int j = 0;
 
     // Create OpStack for holding operators
     OpStack* stack = create_op_stack();
+    if (!stack)
+    {
+        fprintf(stderr, "Failed to allocate memory for operator stack\n");
+        exit(1);
+    }
 
     // Iterate over each
     for (int i = 0; i < len; i++)
@@ -253,11 +274,13 @@ bool infix_to_postfix(char* infix, char* postfix)
         // If c is an operand, append to result
         if (isdigit(c) || c == '.')
         {
+            // Instantiate token
             char token[64];
             int index = 0;
 
             while (i < len && (isdigit(infix[i]) || infix[i] == '.'))
             {
+                // Iterate over each character until an operand is found
                 token[index++] = infix[i];
                 i++;
             }
@@ -265,10 +288,12 @@ bool infix_to_postfix(char* infix, char* postfix)
 
             for (int k = 0; token[k] != '\0'; k++)
             {
+                // Append token onto result
                 result[j++] = token[k];
             }
-
+            // Add whitespace
             result[j++] = ' ';
+            // Decrement for loop counter
             i--;
         }
 
@@ -286,6 +311,7 @@ bool infix_to_postfix(char* infix, char* postfix)
             while (!is_opstack_empty(stack) && peek_op(stack) != '(')
             {
                 result[j++] = pop_op(stack);
+                result[j++] = ' ';
             }
             (void) pop_op(stack);
         }
@@ -295,9 +321,20 @@ bool infix_to_postfix(char* infix, char* postfix)
         {
             while (!is_opstack_empty(stack) && lower_or_equal_prec(c, peek_op(stack)))
             {
+                // Keep popping from stack and send onto result
                 result[j++] = pop_op(stack);
+                result[j++] = ' ';
             }
+            // Append operator onto stack
             push_op(stack, c);
+        }
+
+        // Invalid character case
+        else {
+            fprintf(stderr, "Invalid character!\n");
+            free_opstack(stack);
+            free(result);
+            return false;
         }
     }
 
@@ -305,23 +342,82 @@ bool infix_to_postfix(char* infix, char* postfix)
     while (!is_opstack_empty(stack))
     {
         result[j++] = pop_op(stack);
+        result[j++] = ' ';
     }
 
+    // Terminate result string
     result[j] = '\0';
+
+    // Copy result onto postfix pointer
     strcpy(postfix, result);
 
+    // Free memory
     free_opstack(stack);
+    free(result);
 
     return true;
 }
 
-bool evalPostfix(char* postfix, double* result)
+bool eval_postfix(char* postfix, double* result)
 {
-    // TODO: Implement postfix evaluation here
-    // - Use stack for operands
-    // - Push numbers onto stack
-    // - Pop operands when operator is found, apply, push result back
-    // - Handle division by zero
-    // Return false if invalid
-    return false; // placeholder
+    NumStack* stack = create_num_stack();
+    if (!stack)
+    {
+        fprintf(stderr, "Failed to allocate memory for stack!\n");
+        exit(1);
+    }
+    int len = strlen(postfix);
+    int j = 0;
+
+    for (int i = 0; i < len; i++)
+    {
+        char c = postfix[i];
+
+        // Push onto stack if operand
+        if (isdigit(c) || c == '.')
+        {
+            // Instantiate token
+            char token[64];
+            int index = 0;
+
+            while (i < len && (isdigit(postfix[i]) || postfix[i] == '.'))
+            {
+                // Iterate over each character until an operand is found
+                token[index++] = postfix[i];
+                i++;
+            }
+            token[index] = '\0';
+
+            // Push onto stack the tokenised double
+            push_num(stack, atof(token));
+            // Decrement for loop counter
+            i--;
+        }
+
+        else if (is_operator(c))
+        {
+            double x = 0.0;
+            double y = 0.0;
+            double value = 0.0;
+
+            if (!is_numstack_empty(stack))
+            {
+                x = pop_num(stack);
+            }
+
+            if (!is_numstack_empty(stack))
+            {
+                y = pop_num(stack);
+            }
+
+            value = eval_expr(x, y, c);
+            push_num(stack, value);
+        }
+
+        else if (isspace(c)) continue;
+    }
+    *result = pop_num(stack);
+    free_numstack(stack);
+
+    return true;
 }

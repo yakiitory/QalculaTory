@@ -10,7 +10,7 @@ ifeq (, $(clang))
 endif
 
 $(OUT): $(OBJ)
-	@$(CC) $^ -o $@
+	@$(CC) $^ -o $@ -lm
 	@printf "\e[33mLinking\e[90m %s\e[0m\n" $@
 	@printf "\e[34mDone!\e[0m\n"
 
