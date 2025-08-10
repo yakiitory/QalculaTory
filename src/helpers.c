@@ -319,6 +319,12 @@ bool infix_to_postfix(char* infix, char* postfix)
         // If c is an operator
         else if (is_operator(c))
         {
+            if (is_operator(infix[i - 1]))
+            {
+                fprintf(stderr, "Operator placed in place I don't want it to be!\n");
+                exit(1);
+            }
+
             while (!is_opstack_empty(stack) && lower_or_equal_prec(c, peek_op(stack)))
             {
                 // Keep popping from stack and send onto result
