@@ -203,6 +203,8 @@ int get_prec(char op)
         case '+': case '-': return 1;
         case '*': case '/': return 2;
         case '^': return 3;
+        case '!': return 4;
+        case 's': case 'c': case 't': case 'q': 5;
         default: return -1;
     }
 }
@@ -213,32 +215,54 @@ bool lower_or_equal_prec(char x, char y)
            get_prec(x) == get_prec(y);
 }
 
-bool is_right_associative(char op)
-{
-    return op == '^';
-}
-
-bool is_left_associative(char op)
-{
-    return op != '^';
-}
-
-bool is_operator(char c)
+bool is_op(char c)
 {
     switch (c)
     {
+        // Standard operators
         case '+': case '-': case '*': case '/': case '^': return true;
+        default: return false;
+    }
+}
+
+bool is_func(char c)
+{
+    switch (c)
+    {
+        case 's': return true;
+        case 'c': return true;
+        case 't': return true;
+        case 'q': return true;
         default: return false;
     }
 }
 
 double eval_expr(double x, double y, char op)
 {
-    if (op == '+') { return y + x; }
-    else if (op == '-') { return y - x; }
-    else if (op == '*') { return y * x; }
-    else if (op == '/') { return y / x; }
-    else if (op == '^') { return pow(y,x); }
+    switch (op)
+    {
+        case '+': return y + x;
+        case '-': return y - x;
+        case '*': return y * x;
+        case '/': return y / x;
+        case '^': return pow(y,x);
+    }
+}
+
+double deg_to_rad(double deg)
+{
+    return deg * M_PI / 180.0;
+}
+
+double eval_fexpr(double x, char op)
+{
+    switch (op)
+    {
+        case 's': return sin(deg_to_rad(x));
+        case 'c': return cos(deg_to_rad(x));
+        case 't': return tan(deg_to_rad(x));
+        case 'q': return sqrt(x);
+    }
 }
 
 bool infix_to_postfix(char* infix, char* postfix)
@@ -297,7 +321,6 @@ bool infix_to_postfix(char* infix, char* postfix)
             i--;
         }
 
-
         // If c is '(', push onto stack
         else if (c == '(')
         {
@@ -314,12 +337,18 @@ bool infix_to_postfix(char* infix, char* postfix)
                 result[j++] = ' ';
             }
             (void) pop_op(stack);
+
+            if (!is_opstack_empty(stack) && is_func(peek_op(stack)))
+            {
+                result[j++] = pop_op(stack);
+                result[j++] = ' ';
+            }
         }
 
         // If c is an operator
-        else if (is_operator(c))
+        else if (is_op(c))
         {
-            if (is_operator(infix[i - 1]))
+            if (is_op(infix[i - 1]))
             {
                 fprintf(stderr, "Operator placed in place I don't want it to be!\n");
                 exit(1);
@@ -333,6 +362,36 @@ bool infix_to_postfix(char* infix, char* postfix)
             }
             // Append operator onto stack
             push_op(stack, c);
+        }
+
+        // Functional Operators
+        // If the next n chars correspond to a func(), push a func op onto the stack and skip over to '('
+        else if (strncmp(&infix[i], "sin", 3) == 0)
+        {
+            char f_op = 's';
+            push_op(stack, f_op);
+            i += 2;
+        }
+
+        else if (strncmp(&infix[i], "cos", 3) == 0)
+        {
+            char f_op = 'c';
+            push_op(stack, f_op);
+            i += 2;
+        }
+
+        else if (strncmp(&infix[i], "tan", 3) == 0)
+        {
+            char f_op = 't';
+            push_op(stack, f_op);
+            i += 2;
+        }
+
+        else if (strncmp(&infix[i], "sqrt", 4) == 0)
+        {
+            char f_op = 'q';
+            push_op(stack, f_op);
+            i += 3;
         }
 
         // Invalid character case
@@ -400,7 +459,7 @@ bool eval_postfix(char* postfix, double* result)
             i--;
         }
 
-        else if (is_operator(c))
+        else if (is_op(c))
         {
             double x = 0.0;
             double y = 0.0;
@@ -417,6 +476,20 @@ bool eval_postfix(char* postfix, double* result)
             }
 
             value = eval_expr(x, y, c);
+            push_num(stack, value);
+        }
+
+        else if (is_func(c))
+        {
+            double x = 0.0;
+            double value = 0.0;
+
+            if (!is_numstack_empty(stack))
+            {
+                x = pop_num(stack);
+            }
+
+            value = eval_fexpr(x, c);
             push_num(stack, value);
         }
 
