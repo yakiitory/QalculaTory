@@ -12,3 +12,5 @@ bool infix_to_postfix(char* infix, char* postfix);
 
 // Evaluates a postfix expression
 bool eval_postfix(char* postfix, double* result);
+
+unsigned int isqrt(unsigned int n);

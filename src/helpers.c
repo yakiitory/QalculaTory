@@ -204,7 +204,7 @@ int get_prec(char op)
         case '*': case '/': return 2;
         case '^': return 3;
         case '!': return 4;
-        case 's': case 'c': case 't': case 'q': 5;
+        case 's': case 'c': case 't': case 'q': case 'i': 5;
         default: return -1;
     }
 }
@@ -229,10 +229,17 @@ bool is_func(char c)
 {
     switch (c)
     {
+        // sin, cos, tan, sqrt, isqrt
         case 's': return true;
         case 'c': return true;
         case 't': return true;
         case 'q': return true;
+        case 'i': return true;
+
+        // positive, negative
+        case 'p': return true;
+        case 'm': return true;
+        case '!': return true;
         default: return false;
     }
 }
@@ -254,6 +261,26 @@ double deg_to_rad(double deg)
     return deg * M_PI / 180.0;
 }
 
+unsigned int isqrt(unsigned int n)
+{
+    int L = 0, M = 0, H = n;
+    while (L <= H)
+    {
+        M = (L + H) / 2;
+        if ((M*M) == n) return M;
+        else if ((M*M) < n) L=M+1;
+        else H=M-1;
+    }
+    return H;
+}
+
+double fact(double x)
+{
+    double ret = 1;
+    while (x) ret *= x--;
+    return ret;
+}
+
 double eval_fexpr(double x, char op)
 {
     switch (op)
@@ -262,6 +289,10 @@ double eval_fexpr(double x, char op)
         case 'c': return cos(deg_to_rad(x));
         case 't': return tan(deg_to_rad(x));
         case 'q': return sqrt(x);
+        case 'i': return isqrt(x);
+        case '!': return fact(x);
+        case 'm': return x * -1;
+        case 'p': return x * 1;
     }
 }
 
@@ -327,6 +358,12 @@ bool infix_to_postfix(char* infix, char* postfix)
             push_op(stack, c);
         }
 
+        // func with higher precedence
+        else if (c == '!')
+        {
+            push_op(stack, c);
+        }
+
         // If c is ')',
         else if (c == ')')
         {
@@ -348,10 +385,24 @@ bool infix_to_postfix(char* infix, char* postfix)
         // If c is an operator
         else if (is_op(c))
         {
-            if (is_op(infix[i - 1]))
+            if (is_op(infix[i - 1]) && (infix[i-1] != '+' || infix[i-1] != '-'))
             {
                 fprintf(stderr, "Operator placed in place I don't want it to be!\n");
                 exit(1);
+            }
+
+            // Unary conditional
+            if (i == 0 || is_op(infix[i-1]) || infix[i-1] == '(')
+            {
+                if (c == '+')
+                {
+                    infix[i] = 'p';
+                }
+
+                if (c == '-')
+                {
+                    infix[i] = 'm';
+                }
             }
 
             while (!is_opstack_empty(stack) && lower_or_equal_prec(c, peek_op(stack)))
@@ -392,6 +443,13 @@ bool infix_to_postfix(char* infix, char* postfix)
             char f_op = 'q';
             push_op(stack, f_op);
             i += 3;
+        }
+
+        else if (strncmp(&infix[i], "isqrt", 5) == 0)
+        {
+            char f_op = 'i';
+            push_op(stack, f_op);
+            i += 4;
         }
 
         // Invalid character case
