@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include "helpers.h"
+#include "shunting_yard.h"
+#include "stack.h"
 
 int main(void)
 {

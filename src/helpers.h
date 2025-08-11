@@ -1,3 +1,4 @@
+#ifndef HELPERS_H
 #define HELPERS_H
 
 #include <stdbool.h>
@@ -6,11 +7,21 @@
 // Maximum length for expressions
 #define MAX_LEN 256
 
-//  Converts an infix expression to postfix
-// returns true if successful, false if invalid
-bool infix_to_postfix(char* infix, char* postfix);
+#define ERR_STACK_MEMORY "Failed to allocate memory for stack"
+#define ERR_STACK_EMPTY "Stack is empty"
+#define ERR_NODE_MEMORY "Failed to allocate memory for node"
+#define ERR_MALLOC "Failed to allocate memory"
+#define SYNTAX_ERROR "Syntax Error!"
 
-// Evaluates a postfix expression
-bool eval_postfix(char* postfix, double* result);
-
+void remove_spaces(char* s);
+int get_prec(char op);
+bool lower_or_equal_prec(char x, char y);
+bool is_op(char c);
+bool is_func(char c);
+double eval_expr(double x, double y, char op);
+double eval_fexpr(double x, char op);
 unsigned int isqrt(unsigned int n);
+double fact(double x);
+double deg_to_rad(double deg);
+
+#endif // HELPERS_H
