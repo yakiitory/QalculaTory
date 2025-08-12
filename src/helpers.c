@@ -21,7 +21,7 @@ int get_prec(char op)
         case '*': case '/': return 2;
         case '^': return 3;
         case '!': return 4;
-        case 's': case 'c': case 't': case 'q': case 'i': return 5;
+        case 's': case 'c': case 't': case 'q': case 'i': case 'p': case 'm': return 5;
         default: return -1;
     }
 }
@@ -37,7 +37,7 @@ bool is_op(char c)
 {
     switch (c)
     {
-        case '+': case '-': case '*': case '/': case '^': case '!': return true;
+        case '+': case '-': case '*': case '/': case '^': return true;
         default: return false;
     }
 }

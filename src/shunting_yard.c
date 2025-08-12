@@ -40,7 +40,7 @@ bool infix_to_postfix(char* infix, char* postfix)
     remove_spaces(infix);
     int len = strlen(infix);
     char* result = malloc(len * 3);
-    int j = 0;
+    int j = 0, open_paren = 0, close_paren = 0;
 
     if (!result)
     {
@@ -59,9 +59,19 @@ bool infix_to_postfix(char* infix, char* postfix)
         {
             char token[64];
             int index = 0;
+            int periods = 0;
             while (i < len && (isdigit(infix[i]) || infix[i] == '.'))
             {
                 token[index++] = infix[i++];
+
+                if (infix[i] == '.') periods++;
+                if (periods == 2)
+                {
+                    free(result);
+                    free_opstack(stack);
+                    fprintf(stderr, "%s\n", SYNTAX_ERROR);
+                    exit(1);
+                }
             }
             token[index] = '\0';
             for (int k = 0; token[k] != '\0'; k++)
@@ -79,8 +89,14 @@ bool infix_to_postfix(char* infix, char* postfix)
             continue;
         }
 
-        // Left parenthesis or factorial
-        if (c == '(' || c == '!')
+        if (c == '(')
+        {
+            open_paren++;
+            push_op(stack, c);
+            continue;
+        }
+
+        if (c == '!')
         {
             push_op(stack, c);
             continue;
@@ -89,6 +105,7 @@ bool infix_to_postfix(char* infix, char* postfix)
         // Right parenthesis
         if (c == ')')
         {
+            close_paren++;
             while (!is_opstack_empty(stack) && peek_op(stack) != '(')
             {
                 result[j++] = pop_op(stack);
@@ -129,7 +146,15 @@ bool infix_to_postfix(char* infix, char* postfix)
             continue;
 
         // If we reach here, it’s truly invalid
-        fprintf(stderr, "Invalid character: %c\n", c);
+        fprintf(stderr, "%s\n", SYNTAX_ERROR);
+        free_opstack(stack);
+        free(result);
+        return false;
+    }
+
+    if (open_paren != close_paren)
+    {
+        fprintf(stderr, "%s\n", SYNTAX_ERROR);
         free_opstack(stack);
         free(result);
         return false;
@@ -158,7 +183,8 @@ bool eval_postfix(char* postfix, double* result)
         fprintf(stderr, "%s\n", ERR_STACK_MEMORY);
         exit(1);
     }
-    int len = strlen(postfix);
+    int len = strlen(postfix), open_paren = 0, close_paren = 0;
+
     // iterate over each char in postfix
     for (int i = 0; i < len; i++)
     {
@@ -182,7 +208,15 @@ bool eval_postfix(char* postfix, double* result)
             double x = 0.0;
             double y = 0.0;
             double value = 0.0;
+
             if (!is_numstack_empty(stack)) x = pop_num(stack);
+
+            if (is_numstack_empty(stack))
+            {
+                fprintf(stderr, "%s\n", SYNTAX_ERROR);
+                free_numstack(stack);
+                exit(1);
+            }
             if (!is_numstack_empty(stack)) y = pop_num(stack);
             value = eval_expr(x, y, c);
             push_num(stack, value);
@@ -192,6 +226,12 @@ bool eval_postfix(char* postfix, double* result)
         {
             double x = 0.0;
             double value = 0.0;
+            if (is_numstack_empty(stack))
+            {
+                fprintf(stderr, "%s\n", SYNTAX_ERROR);
+                free_numstack(stack);
+                exit(1);
+            }
             if (!is_numstack_empty(stack)) x = pop_num(stack);
             value = eval_fexpr(x, c);
             push_num(stack, value);
