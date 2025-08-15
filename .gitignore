@@ -51,9 +51,28 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
-# debug information files
-*.dwo
+# Build artifacts
+gui/build/
+*.o
+*.obj
+*.moc
+*.rcc
+*.ui.h
+*.qmake.stash
+*.pro.user
+*.user
+*.autosave
+Makefile
+*.a
+*.so
+*.dll
+*.exe
+*.out
+*.qrc.cpp
 
-# My files
-demo
+# IDE folders
 .vscode/
+
+# OS generated files
+.DS_Store
+Thumbs.db

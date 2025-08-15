@@ -1,6 +1,10 @@
 #ifndef STACK_H
 #define STACK_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -36,5 +40,9 @@ char peek_op(OpStack* stack);
 
 void free_numstack(NumStack* stack);
 void free_opstack(OpStack* stack);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

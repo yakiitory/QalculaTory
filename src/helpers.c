@@ -1,8 +1,16 @@
+/*
+*   Helper funcs for infix to postfix as well as postfix evaluation
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <math.h>
 #include "helpers.h"
+
+// Default angle mode
+int angle_mode = MODE_DEG;
+double ANS = 0.0f;
 
 // Remove whitespaces
 void remove_spaces(char* s)
@@ -21,7 +29,7 @@ int get_prec(char op)
         case '*': case '/': return 2;
         case '^': return 3;
         case '!': return 4;
-        case 's': case 'c': case 't': case 'q': case 'i': case 'p': case 'm': return 5;
+        case 's': case 'c': case 't': case 'S': case 'C': case 'T': case 'q': case 'i': case 'p': case 'm': return 5;
         default: return -1;
     }
 }
@@ -50,6 +58,9 @@ bool is_func(char c)
         case 's': return true;
         case 'c': return true;
         case 't': return true;
+        case 'S': return true;
+        case 'C': return true;
+        case 'T': return true;
         case 'q': return true;
         case 'i': return true;
 
@@ -74,21 +85,31 @@ double eval_expr(double x, double y, char op)
     }
 }
 
-// function operators
+// Function operators
 double eval_fexpr(double x, char op)
 {
     switch (op)
     {
-        case 's': return sin(deg_to_rad(x));
-        case 'c': return cos(deg_to_rad(x));
-        case 't': return tan(deg_to_rad(x));
+        // Forward trig
+        case 's': return sin(to_radians(x));
+        case 'c': return cos(to_radians(x));
+        case 't': return tan(to_radians(x));
+
+        // Inverse trig
+        case 'S': return from_radians(asin(x));
+        case 'C': return from_radians(acos(x));
+        case 'T': return from_radians(atan(x));
+
+        // Other functions
         case 'q': return sqrt(x);
         case 'i': return isqrt(x);
         case '!': return fact(x);
         case 'm': return x * -1;
-        case 'p': return x * 1;
+        case 'p': return x;
     }
+    return NAN;
 }
+
 
 unsigned int isqrt(unsigned int n)
 {
@@ -110,7 +131,35 @@ double fact(double x)
     return ret;
 }
 
-double deg_to_rad(double deg)
+double to_radians(double x)
 {
-    return deg * M_PI / 180.0;
+    switch (angle_mode) {
+        case MODE_DEG:  return x * M_PI / 180.0;
+        case MODE_GRAD: return x * M_PI / 200.0;
+        default:        return x;
+    }
+}
+
+double from_radians(double x)
+{
+    switch (angle_mode) {
+        case MODE_DEG:  return x * 180.0 / M_PI;
+        case MODE_GRAD: return x * 200.0 / M_PI;
+        default:        return x;
+    }
+}
+
+void set_mode(int mode)
+{
+    angle_mode = mode;
+}
+
+void set_ans(double ans)
+{
+    ANS = ans;
+}
+
+double get_ans(void)
+{
+    return ANS;
 }

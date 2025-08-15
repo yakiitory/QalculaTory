@@ -1,37 +1,22 @@
 #include <stdio.h>
+#include <string.h>
 #include "helpers.h"
 #include "shunting_yard.h"
 #include "stack.h"
 
-int main(void)
+static char result_static[25];
+
+const char* parser(const char* infix)
 {
-    char infix[MAX_LEN];
     char postfix[MAX_LEN];
-    double result;
 
-    printf("Enter infix expression: ");
-    if (!fgets(infix, sizeof(infix), stdin))
-    {
-        printf("[ERROR]: Failed to read input.\n");
-        return 1;
-    }
-
-    infix[strcspn(infix, "\n")] = '\0';
-
+    // Convert to postfix
     if (!infix_to_postfix(infix, postfix))
-    {
-        printf("Error: Invalid infix expression.\n");
-        return 1;
-    }
+        return SYNTAX_ERROR;
 
-    printf("Postfix: %s\n", postfix);
+    // Evaluate postfix into result_static
+    if (!eval_postfix(postfix, result_static))
+        return SYNTAX_ERROR;
 
-    if (!eval_postfix(postfix, &result))
-    {
-        printf("Error: Failed to evaluate expression.\n");
-        return 1;
-    }
-
-    printf("Result: %.6f\n", result);
-    return 0;
+    return result_static;
 }

@@ -1,3 +1,7 @@
+/*
+*   Implementation of the Shunting Yard Algorithm, with postfix evaluation and math function support
+*/
+
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -18,6 +22,9 @@ static int handle_math_function(const char* infix, int i, OpStack* stack)
         {"sin",  's'},
         {"cos",  'c'},
         {"tan",  't'},
+        {"arcsin",  'S'},
+        {"arccos",  'C'},
+        {"arctan",  'T'},
         {"sqrt", 'q'},
         {"isqrt",'i'}
     };
@@ -69,8 +76,7 @@ bool infix_to_postfix(char* infix, char* postfix)
                 {
                     free(result);
                     free_opstack(stack);
-                    fprintf(stderr, "%s\n", SYNTAX_ERROR);
-                    exit(1);
+                    return false;
                 }
             }
             token[index] = '\0';
@@ -78,6 +84,42 @@ bool infix_to_postfix(char* infix, char* postfix)
                 result[j++] = token[k];
             result[j++] = ' ';
             i--; // step back because for-loop will increment
+            continue;
+        }
+
+        // Turns Ans into value
+        if (infix[i] == 'A' && infix[i + 1] == 'n' && infix[i + 2] == 's')
+        {
+            i += 2;
+            int len_buf = snprintf(&result[j], 64, "%g", get_ans());
+            j+=len_buf;
+            result[j++] = ' ';
+            continue;
+        }
+
+        // Turns pi and e into value
+        if (infix[i] == 'p' && infix[i + 1] == 'i')
+        {
+            i += 1;
+            for (int k = 0; PI_VAL[k] != '\0'; k++)
+                result[j++] = PI_VAL[k];
+            result[j++] = ' ';
+            continue;
+        }
+        if (infix[i] == 'e')
+        {
+            for (int k = 0; E_VAL[k] != '\0'; k++)
+                result[j++] = E_VAL[k];
+            result[j++] = ' ';
+            continue;
+        }
+        // pi in UTF-8
+        if ((unsigned char)infix[i] == 0xCF && (unsigned char)infix[i+1] == 0x80)
+        {
+            i++;
+            for (int k = 0; PI_VAL[k] != '\0'; k++)
+                result[j++] = PI_VAL[k];
+            result[j++] = ' ';
             continue;
         }
 
@@ -146,7 +188,6 @@ bool infix_to_postfix(char* infix, char* postfix)
             continue;
 
         // If we reach here, it’s truly invalid
-        fprintf(stderr, "%s\n", SYNTAX_ERROR);
         free_opstack(stack);
         free(result);
         return false;
@@ -154,7 +195,6 @@ bool infix_to_postfix(char* infix, char* postfix)
 
     if (open_paren != close_paren)
     {
-        fprintf(stderr, "%s\n", SYNTAX_ERROR);
         free_opstack(stack);
         free(result);
         return false;
@@ -174,7 +214,7 @@ bool infix_to_postfix(char* infix, char* postfix)
     return true;
 }
 
-bool eval_postfix(char* postfix, double* result)
+bool eval_postfix(char* postfix, char* result)
 {
     // build stack
     NumStack* stack = create_num_stack();
@@ -213,9 +253,8 @@ bool eval_postfix(char* postfix, double* result)
 
             if (is_numstack_empty(stack))
             {
-                fprintf(stderr, "%s\n", SYNTAX_ERROR);
                 free_numstack(stack);
-                exit(1);
+                return false;
             }
             if (!is_numstack_empty(stack)) y = pop_num(stack);
             value = eval_expr(x, y, c);
@@ -228,9 +267,8 @@ bool eval_postfix(char* postfix, double* result)
             double value = 0.0;
             if (is_numstack_empty(stack))
             {
-                fprintf(stderr, "%s\n", SYNTAX_ERROR);
                 free_numstack(stack);
-                exit(1);
+                return false;
             }
             if (!is_numstack_empty(stack)) x = pop_num(stack);
             value = eval_fexpr(x, c);
@@ -238,7 +276,9 @@ bool eval_postfix(char* postfix, double* result)
         }
         else if (isspace(c)) continue;
     }
-    *result = pop_num(stack);
+    double num_buf = pop_num(stack);
+    set_ans(num_buf);
+    sprintf(result, "%.12lg", num_buf);
     free_numstack(stack);
     return true;
 }

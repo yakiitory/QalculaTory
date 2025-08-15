@@ -1,3 +1,6 @@
+/*
+*   Implementation of stack using linked lists as well as stack functions
+*/
 #include "helpers.h"
 #include "stack.h"
 
@@ -49,7 +52,7 @@ double pop_num(NumStack* stack)
     if (is_numstack_empty(stack))
     {
         fprintf(stderr, "%s\n", ERR_STACK_EMPTY);
-        exit(1);
+        return 0.0f;
     }
     NumNode* temp = stack->head;
     double value = temp->value;
@@ -63,7 +66,7 @@ double peek_num(NumStack* stack)
     if (is_numstack_empty(stack))
     {
         fprintf(stderr, "%s\n", ERR_STACK_EMPTY);
-        exit(1);
+        return 0.0f;
     }
     return stack->head->value;
 }
