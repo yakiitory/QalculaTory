@@ -26,6 +26,7 @@ private:
     // helper for implementing specific button functions
     void implementButton(QString name);
     void implementRadio(QString name);
+    void implementMenuAction(QString name, QClipboard* clipboard);
 };
 
 #endif // MAINWINDOW_H

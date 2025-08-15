@@ -4,7 +4,7 @@
 #include "shunting_yard.h"
 #include "stack.h"
 
-static char result_static[25];
+static char result_static[128];
 
 const char* parser(const char* infix)
 {

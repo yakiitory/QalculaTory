@@ -2,6 +2,10 @@
 #include "ui_mainwindow.h"
 #include "../src/parser.h"
 #include "../src/helpers.h"
+#include "aboutdialog.h"
+
+#include <QClipboard>
+#include <QDialog>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -9,6 +13,8 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     setWindowTitle("QalculaTory");
+
+    QClipboard* clipboard = QApplication::clipboard();
 
     // PushButton Implementations
     for (auto button : findChildren<QPushButton*>()) {
@@ -27,11 +33,18 @@ MainWindow::MainWindow(QWidget *parent)
     // RadioButton Implementations
     for (auto radio : findChildren<QRadioButton*>()) {
         QString name = radio->objectName();
-        if (name == "setDeg" || name == "setRad" || name == "setGrad") {
-            connect(radio, &QRadioButton::toggled, this, [this, radio, name](bool checked) {
-                if (checked) implementRadio(name); // handle specific radio
-            });
-        }
+        connect(radio, &QRadioButton::toggled, this, [this, radio, name](bool checked) {
+            if (checked) implementRadio(name); // handle specific radio
+        });
+    }
+
+
+    // MenuBar Implementations
+    for (auto action : findChildren<QAction*>()) {
+        QString name = action->objectName();
+        connect(action, &QAction::triggered, this, [this, name, clipboard]() {
+            implementMenuAction(name, clipboard); // handle specific menu
+        });
     }
 
     // Font rendering
@@ -55,6 +68,34 @@ void MainWindow::insertText(const QString &text)
     current.insert(pos, text);
     ui->lineEdit->setText(current);
     ui->lineEdit->setCursorPosition(pos + text.length());
+}
+
+void MainWindow::implementMenuAction(QString name, QClipboard* clipboard)
+{
+    if (name == "actionExit")
+    {
+        QCoreApplication::quit();
+    }
+    else if (name == "actionCopy")
+    {
+        clipboard->setText(ui->resultLabel->text());
+    }
+    else if (name == "actionCut")
+    {
+        clipboard->setText(ui->resultLabel->text());
+        ui->lineEdit->setText("");
+        ui->resultLabel->setText("");
+        set_ans(0.0f);
+    }
+    else if (name == "actionPaste")
+    {
+        ui->lineEdit->setText(clipboard->text());
+    }
+    else if (name == "actionAbout")
+    {
+        AboutDialog dlg(this);
+        dlg.exec();
+    }
 }
 
 void MainWindow::implementButton(QString name)

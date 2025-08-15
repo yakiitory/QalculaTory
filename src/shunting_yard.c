@@ -46,7 +46,7 @@ bool infix_to_postfix(char* infix, char* postfix)
 {
     remove_spaces(infix);
     int len = strlen(infix);
-    char* result = malloc(len * 3);
+    char result[128];
     int j = 0, open_paren = 0, close_paren = 0;
 
     if (!result)
@@ -64,7 +64,7 @@ bool infix_to_postfix(char* infix, char* postfix)
         // Number (integer/float)
         if (isdigit(c) || c == '.')
         {
-            char token[64];
+            char token[128];
             int index = 0;
             int periods = 0;
             while (i < len && (isdigit(infix[i]) || infix[i] == '.'))
@@ -74,7 +74,6 @@ bool infix_to_postfix(char* infix, char* postfix)
                 if (infix[i] == '.') periods++;
                 if (periods == 2)
                 {
-                    free(result);
                     free_opstack(stack);
                     return false;
                 }
@@ -91,7 +90,7 @@ bool infix_to_postfix(char* infix, char* postfix)
         if (infix[i] == 'A' && infix[i + 1] == 'n' && infix[i + 2] == 's')
         {
             i += 2;
-            int len_buf = snprintf(&result[j], 64, "%g", get_ans());
+            int len_buf = snprintf(&result[j], 256, "%f", get_ans());
             j+=len_buf;
             result[j++] = ' ';
             continue;
@@ -189,14 +188,12 @@ bool infix_to_postfix(char* infix, char* postfix)
 
         // If we reach here, it’s truly invalid
         free_opstack(stack);
-        free(result);
         return false;
     }
 
     if (open_paren != close_paren)
     {
         free_opstack(stack);
-        free(result);
         return false;
     }
 
@@ -210,7 +207,6 @@ bool infix_to_postfix(char* infix, char* postfix)
     result[j] = '\0';
     strcpy(postfix, result);
     free_opstack(stack);
-    free(result);
     return true;
 }
 
@@ -231,7 +227,7 @@ bool eval_postfix(char* postfix, char* result)
         char c = postfix[i];
         if (isdigit(c) || c == '.')
         {
-            char token[64];
+            char token[128];
             int index = 0;
             while (i < len && (isdigit(postfix[i]) || postfix[i] == '.'))
             {
