@@ -13,24 +13,36 @@
   <property name="font">
    <font>
     <family>Segoe UI</family>
-    <pointsize>-1</pointsize>
    </font>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <property name="styleSheet">
-   <string>QWidget {
-    background-color: #f8f9fa;
-    font-family: Segoe UI, sans-serif;
-    font-size: 14px;
-    color: #212529;
+   <string notr="true">QWidget {
+    background-color: #292828;
+	color: #ececec;
 }
 QPushButton {
-    background-color: #e9ecef;
-    border: 1px solid #ced4da;
-    border-radius: 6px;
+    background-color: #525251;
+	color: #ececec;
+    border-radius: 12px;
     padding: 6px;
+}
+QPushButton#pushAC {
+    background-color: #ff9502;
+}
+QPushButton#pushDEL {
+    background-color: #ff9502;
+}
+QPushButton#pushDivide {
+    background-color: #ff9502;
+}
+QPushButton#pushMinus {
+    background-color: #ff9502;
+}
+QPushButton#pushEqual {
+    background-color: #ff9502;
 }
 QPushButton:hover {
     background-color: #dee2e6;
@@ -38,10 +50,13 @@ QPushButton:hover {
 QPushButton:pressed {
     background-color: #ced4da;
 }
+#mathFunctions QPushButton {
+	background-color: #424241;
+}
 QLineEdit {
-    background-color: #ffffff;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
+    background-color: #292828;
+    border: 4px solid #3c3c3b;
+    border-radius: 8px;
     padding: 4px;
 }</string>
   </property>
@@ -60,7 +75,6 @@ QLineEdit {
         <property name="font">
          <font>
           <family>Segoe UI</family>
-          <pointsize>-1</pointsize>
          </font>
         </property>
         <property name="text">
@@ -76,7 +90,6 @@ QLineEdit {
         <property name="font">
          <font>
           <family>Segoe UI</family>
-          <pointsize>-1</pointsize>
          </font>
         </property>
         <property name="text">
@@ -117,7 +130,7 @@ QLineEdit {
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
-       <layout class="QGridLayout" name="gridLayout_3">
+       <layout class="QGridLayout" name="mathFunctions">
         <item row="2" column="0">
          <widget class="QPushButton" name="pushAsin">
           <property name="sizePolicy">
@@ -582,7 +595,7 @@ QLineEdit {
      <x>0</x>
      <y>0</y>
      <width>906</width>
-     <height>22</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
