@@ -13,6 +13,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     setWindowTitle("QalculaTory");
+    setWindowIcon(QIcon(":/icons/appico.png"));
 
     QClipboard* clipboard = QApplication::clipboard();
 
