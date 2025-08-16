@@ -38,10 +38,10 @@ In the <code>src/</code> directory, all C-related code are stored and is include
   <li><code>main.c</code> defines the CLI version of the program. It is merely a leftover from when the project has not had a GUI yet and was used extensibly for debugging.</li>
 </ul>
 In the <code>gui/</code> directory, all C++ / Qt-related code are stored. The directory stores as follows.
-<li>
-  <ul><code>main.cpp</code> defines the <code>main</code> function, which implements <code>QApplication</code> and instantiates it.</ul>
-  <ul><code>mainwindow.cpp</code> defines the implementation of the MainWindow, which sets the functionality of the buttons implemented by <code>mainwindow.ui</code>. It makes use of it by a simple loop to check for all of the buttons and add their respective functions with the use of other methods defined in the source file. This also defines the window title as well as window icon for <code>QIcon</code>.</ul>
-  <ul><code>mainwindow.ui</code> defines the GUI used by the program in QML. It is created with the use of the GUI UI Builder in the Qt Creator IDE. Styling of the program is also defined here.</ul>
-  <ul><code>aboutdialog.cpp</code> defines the implemntation of the <code>Help > About</code> window. It displays information about the program.</ul>
-  <ul><code>gui.pro</code> defines the Qt project, as well as including all the source files written in C and C++/</ul>
-</li>
+<ul>
+  <li><code>main.cpp</code> defines the <code>main</code> function, which implements <code>QApplication</code> and instantiates it.</li>
+  <li><code>mainwindow.cpp</code> defines the implementation of the MainWindow, which sets the functionality of the buttons implemented by <code>mainwindow.ui</code>. It makes use of it by a simple loop to check for all of the buttons and add their respective functions with the use of other methods defined in the source file. This also defines the window title as well as window icon for <code>QIcon</code>.</li>
+  <li><code>mainwindow.ui</code> defines the GUI used by the program in QML. It is created with the use of the GUI UI Builder in the Qt Creator IDE. Styling of the program is also defined here.</li>
+  <li><code>aboutdialog.cpp</code> defines the implemntation of the <code>Help > About</code> window. It displays information about the program.</li>
+  <li><code>gui.pro</code> defines the Qt project, as well as including all the source files written in C and C++/</li>
+</ul>
