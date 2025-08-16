@@ -14,8 +14,8 @@ A scientific calculator that handles infix notation and evaluates into answers, 
 
 <h2>Installation</h2>
 <p>Since the app is portable, it is simply executed by downloading an AppImage release in <code>releases</code>, and then in the directory of the AppImage,</p>
-<code>chmod u+x ./QalculaTory-*.appimage</code>
-<code>./QalculaTory*.appimage</code>
+<p><code>chmod u+x ./QalculaTory-*.appimage</code></p>
+<p><code>./QalculaTory*.appimage</code></p>
 
 <h2>Features</h2>
 <ul>
