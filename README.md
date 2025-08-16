@@ -12,6 +12,11 @@ A scientific calculator that handles infix notation and evaluates into answers, 
   <img src="https://github.com/yakiitory/QalculaTory/blob/main/assets/example.png?raw=true" alt="Screenshot of the program">
 </p>
 
+<h2>Installation</h2>
+<p>Since the app is portable, it is simply executed by downloading an AppImage release in <code>releases</code>, and then in the directory of the AppImage,</p>
+<code>chmod u+x ./QalculaTory-*.appimage</code>
+<code>./QalculaTory*.appimage</code>
+
 <h2>Features</h2>
 <ul>
   <li>Cross-platform interfaced implemented using Qt 6</li>
